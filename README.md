@@ -4,7 +4,6 @@
 
 LocalScribe is a **local** web application that transcribes your meetings securely, right within your browser. By utilizing the browser's built-in speech recognition. it's the perfect tool for companies with strict IT security policies for installing external third-party tools. 
 
-Your meetings stay your meetings.
 Absolutely **no installation required**.
 
 
