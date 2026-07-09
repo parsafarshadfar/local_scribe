@@ -1,4 +1,4 @@
-# LocalScribe 🎙️
+# LocalScribe for Corporate Employees🎙️
 
 **An ultra-lightweight (~100kb) local web app serving as a zero-installation meeting note-taker for corporate employees.**
 
