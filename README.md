@@ -8,10 +8,10 @@ Absolutely **no installation required**.
 
 ## Features
 
-- ** 100% Private & Corporate Safe:** All transcription happens locally in your browser.
-- ** Zero Installation:** Works entirely within your web browser. Just open lunch_app.bat file and start transcribing.
-- ** Ultra-Lightweight (~100kb):** A minimalist and efficient codebase that doesn't hog system resources.
-- ** Built-in Browser transcriber:** Leverages modern Web Speech APIs for accurate, seamless dictation.
+- **100% Private & Corporate Safe:** All transcription happens locally in your browser.
+- **Zero Installation:** Works entirely within your web browser. Just open lunch_app.bat file and start transcribing.
+- **Ultra-Lightweight (~100kb):** A minimalist and efficient codebase that doesn't hog system resources.
+- **Built-in Browser transcriber:** Leverages modern Web Speech APIs for accurate, seamless dictation.
 
 ## Getting Started
 
