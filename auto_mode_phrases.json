@@ -1,0 +1,43 @@
+{
+  "greetings": [
+    "hello",
+    "hi ",
+    " hi",
+    "hey ",
+    " hey",
+    "good morning",
+    "hi everyone",
+    "morning",
+    "share the screen",
+    "share screen",
+    "see the screen",
+    "can you see my screen",
+    "can you hear me",
+    "good afternoon",
+    "good evening",
+    "howdy",
+    "greetings",
+    "welcome everyone",
+    "let's start",
+    "shall we begin",
+    "starting the meeting",
+    "begin the meeting"
+  ],
+  "farewells": [
+    "bye",
+    "goodbye",
+    "good bye",
+    "see you",
+    "take care",
+    "have a good",
+    "that's all",
+    "end meeting",
+    "meeting adjourned",
+    "thanks everyone",
+    "thank you everyone",
+    "that's it for today",
+    "we're done",
+    "meeting is over",
+    "closing the meeting"
+  ]
+}

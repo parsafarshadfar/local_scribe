@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    <title>Meeting Assistant</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231e293b'/%3E%3Ccircle cx='50' cy='38' r='14' fill='%233b82f6'/%3E%3Crect x='35' y='55' width='30' height='4' rx='2' fill='%2360a5fa'/%3E%3Crect x='40' y='63' width='20' height='4' rx='2' fill='%2360a5fa'/%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ===== THEME SYSTEM ===== */
+        /* Dark (default) */
+        :root,
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --bg-grad-3: #020617;
+            --bg-grad-4: #064e3b;
+            --glass-bg: rgba(15, 23, 42, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.03);
+            --input-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --glow-color: rgba(56, 189, 248, 0.5);
+            --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+            --line-hover: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Midnight Purple */
+        [data-theme="midnight"] {
+            color-scheme: dark;
+            --bg-grad-1: #0c0a1a;
+            --bg-grad-2: #1a0a2e;
+            --bg-grad-3: #0d001a;
+            --bg-grad-4: #1a0533;
+            --glass-bg: rgba(20, 10, 40, 0.5);
+            --glass-border: rgba(168, 85, 247, 0.12);
+            --input-bg: rgba(168, 85, 247, 0.05);
+            --input-border: rgba(168, 85, 247, 0.15);
+            --text-primary: #e8e0f0;
+            --text-secondary: #a78bdb;
+            --text-muted: #6b5b8a;
+            --glow-color: rgba(168, 85, 247, 0.5);
+            --scrollbar-thumb: rgba(168, 85, 247, 0.2);
+            --line-hover: rgba(168, 85, 247, 0.08);
+        }
+
+        /* Light */
+        [data-theme="light"] {
+            color-scheme: light;
+            --bg-grad-1: #f0f4ff;
+            --bg-grad-2: #e0e7ff;
+            --bg-grad-3: #f5f3ff;
+            --bg-grad-4: #ecfdf5;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.03);
+            --input-border: rgba(0, 0, 0, 0.12);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --glow-color: rgba(59, 130, 246, 0.3);
+            --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+            --line-hover: rgba(0, 0, 0, 0.04);
+        }
+
+        .dynamic-bg {
+            background: linear-gradient(-45deg, var(--bg-grad-1), var(--bg-grad-2), var(--bg-grad-3), var(--bg-grad-4));
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+            background-attachment: fixed;
+            color: var(--text-primary);
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .glass-input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Force native select dropdowns to use the theme's color-scheme */
+        select.glass-input {
+            color-scheme: inherit;
+        }
+
+        [data-theme="dark"] select.glass-input,
+        [data-theme="midnight"] select.glass-input {
+            color-scheme: dark;
+        }
+
+        [data-theme="light"] select.glass-input {
+            color-scheme: light;
+        }
+
+        /* Explicit option styling (works on some browsers, fails on Windows native) */
+
+
+        .transcript-line {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .transcript-line:hover {
+            background-color: var(--line-hover);
+            transform: translateX(4px);
+        }
+
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        .recording-indicator {
+            animation: blink 1.5s infinite;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .entity-tag {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(168, 85, 247, 0.15);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .topic-tag {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+        }
+
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: all;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: #f8fafc;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 360px;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .toast.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .toast.countdown {
+            border-left: 4px solid #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%) scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(120%) scale(0.9);
+                opacity: 0;
+            }
+        }
+
+        .toast.leaving {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        .standby-pulse {
+            animation: standby 2.5s ease-in-out infinite;
+        }
+
+        @keyframes standby {
+
+            0%,
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+            }
+
+            50% {
+                opacity: 0.5;
+                text-shadow: none;
+            }
+        }
+
+        .glow-text {
+            text-shadow: 0 0 20px var(--glow-color);
+        }
+
+        /* Editable transcript line */
+        .transcript-text[contenteditable="true"] {
+            outline: 2px solid rgba(59, 130, 246, 0.5);
+            border-radius: 6px;
+            padding: 2px 6px;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .transcript-text {
+            cursor: text;
+            border-radius: 6px;
+            padding: 2px 6px;
+            transition: background 0.2s;
+        }
+
+        .transcript-text:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Paused indicator */
+        .paused-indicator {
+            animation: pauseBlink 1s ease-in-out infinite;
+        }
+
+        @keyframes pauseBlink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Theme switcher */
+        .theme-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .theme-dot:hover {
+            transform: scale(1.15);
+        }
+
+        .theme-dot.active {
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Copy button animation */
+        .copy-btn {
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: rgba(16, 185, 129, 0.3) !important;
+            border-color: rgba(16, 185, 129, 0.5) !important;
+        }
+
+        /* Light theme overrides for text in Tailwind classes */
+        [data-theme="light"] .text-slate-100,
+        [data-theme="light"] .text-slate-200 {
+            color: #334155;
+        }
+
+        [data-theme="light"] .text-slate-300 {
+            color: #475569;
+        }
+
+        [data-theme="light"] .text-slate-400 {
+            color: #64748b;
+        }
+
+        [data-theme="light"] .text-slate-500 {
+            color: #94a3b8;
+        }
+
+        [data-theme="light"] .text-white {
+            color: white;
+        }
+
+        [data-theme="light"] .toast {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] option {
+            background: #f0f4ff;
+            color: #1e293b;
+        }
+
+        :root option,
+        [data-theme="dark"] option {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+
+        [data-theme="midnight"] option {
+            background: #0c0a1a;
+            color: #e8e0f0;
+        }
+    </style>
+</head>
+
+<body class="dynamic-bg min-h-screen" data-theme="dark">
+    <div class="max-w-6xl mx-auto p-4 md:p-6">
+        <!-- Header -->
+        <header class="mb-6">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1
+                        class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent glow-text tracking-tight pb-1">
+                        Meeting Assistant
+                    </h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Theme Switcher -->
+                    <div class="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full border border-white/10">
+                        <span class="theme-dot active" data-theme-val="dark" onclick="setTheme('dark')" title="Dark" aria-label="Dark theme"
+                            style="background: linear-gradient(135deg, #0f172a, #1e1b4b)"></span>
+                        <span class="theme-dot" data-theme-val="midnight" onclick="setTheme('midnight')"
+                            title="Midnight Purple" aria-label="Midnight Purple theme"
+                            style="background: linear-gradient(135deg, #1a0a2e, #4c1d95)"></span>
+                        <span class="theme-dot" data-theme-val="light" onclick="setTheme('light')" title="Light" aria-label="Light theme"
+                            style="background: linear-gradient(135deg, #f0f4ff, #e0e7ff)"></span>
+                    </div>
+                    <button id="installBtn" onclick="installPWA()"
+                        class="hidden text-xs px-3 py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                        ⊕ Install App
+                    </button>
+                    <span id="statusBadge"
+                        class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-slate-300 border border-white/20 backdrop-blur-md shadow-lg">Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mic Permission Guide Banner -->
+        <div id="micBanner" class="glass-panel rounded-2xl p-4 mb-5 border-l-4 border-amber-500 hidden">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-sm font-bold text-amber-300 mb-1">🎙 Microphone keeps asking for permission?</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-2">
+                        <strong>Easy fix:</strong> Double-click <code
+                            class="px-1.5 py-0.5 bg-black/30 rounded text-amber-300">launch_app.bat</code> in the app
+                        folder. It will open the app in your browser with permanent mic access — no popups ever again.
+                    </p>
+                </div>
+                <button onclick="dismissMicBanner()"
+                    class="text-slate-500 hover:text-slate-300 transition-colors flex-shrink-0" title="Dismiss">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Meeting Info Bar -->
+        <div class="glass-panel rounded-2xl p-5 mb-5">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-3 flex-1 min-w-[200px]">
+                    <svg class="w-5 h-5 text-blue-400 drop-shadow-md" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <input id="meetingName" type="text" placeholder="Meeting name..."
+                        class="glass-input text-sm rounded-xl px-4 py-2.5 flex-1 outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-slate-400"
+                        value="">
+                    <button onclick="detectMeetingName()"
+                        class="text-xs px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-xl transition-all border border-white/10 hover:border-white/20 hover:shadow-lg whitespace-nowrap font-medium">
+                        Auto-Detect
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 text-sm text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span id="meetingTimer" class="timer-display font-mono">00:00:00</span>
+                    </div>
+                    <div id="meetingTimeRange" class="text-xs text-slate-500 hidden">
+                        <span id="startTimeDisplay">--:--</span> → <span id="endTimeDisplay">--:--</span>
+                    </div>
+                </div>
+            </div>
+            <div id="detectedSource" class="text-xs text-emerald-400 mt-2 hidden"></div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex flex-wrap items-center gap-3">
+                <button id="startBtn" onclick="startRecording()"
+                    class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(225,29,72,0.4)] hover:shadow-[0_0_25px_rgba(225,29,72,0.6)] hover:-translate-y-0.5 border border-red-400/30">
+                    <div class="relative">
+                        <div class="w-3 h-3 bg-white rounded-full shadow-[0_0_10px_white]"></div>
+                        <div id="pulseRing" class="hidden absolute inset-0 w-3 h-3 bg-white rounded-full pulse-ring">
+                        </div>
+                    </div>
+                    Start Recording
+                </button>
+                <button id="pauseBtn" onclick="togglePause()"
+                    class="hidden flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-white rounded-xl font-bold transition-all shadow-lg border border-amber-400/30">
+                    <svg id="pauseIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" />
+                        <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" />
+                    </svg>
+                    <span id="pauseBtnText">Pause</span>
+                </button>
+                <button id="stopBtn" onclick="stopRecording()"
+                    class="hidden flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white rounded-xl font-bold transition-all shadow-lg border border-red-400/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>Stop
+                </button>
+                <button onclick="generateSummary()"
+                    class="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] hover:-translate-y-0.5 border border-blue-400/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>Summarize
+                </button>
+                <div class="h-8 w-px bg-white/20 mx-1"></div>
+                <button onclick="exportTxt()"
+                    class="flex items-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-slate-100 rounded-xl font-medium transition-all text-sm border border-white/10 hover:border-white/30 hover:-translate-y-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>Export
+                </button>
+                <button onclick="clearAll()"
+                    class="flex items-center gap-2 px-4 py-3 bg-white/10 hover:bg-red-500/20 hover:text-red-300 text-slate-300 rounded-xl font-medium transition-all text-sm border border-white/10 hover:border-red-500/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>Clear
+                </button>
+                <div class="ml-auto flex items-center gap-3">
+                    <select id="languageSelect"
+                        class="glass-input text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/50 outline-none">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="es-ES">Spanish</option>
+                        <option value="fr-FR">French</option>
+                        <option value="de-DE">German</option>
+                        <option value="it-IT">Italian</option>
+                        <option value="pt-BR">Portuguese</option>
+                        <option value="zh-CN">Chinese</option>
+                        <option value="ja-JP">Japanese</option>
+                        <option value="ko-KR">Korean</option>
+                        <option value="ru-RU">Russian</option>
+                        <option value="hi-IN">Hindi</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto Mode Panel -->
+        <div class="glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <button id="autoModeBtn" onclick="toggleAutoMode()"
+                        class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-600 transition-colors focus:outline-none"
+                        role="switch" aria-checked="false">
+                        <span id="autoModeThumb"
+                            class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white transition-transform"></span>
+                    </button>
+                    <span class="text-sm font-medium text-slate-300">Auto Mode</span>
+                </div>
+                <div id="autoModeStatus" class="text-xs text-slate-500 flex items-center gap-2">
+                    <span>Off — toggle to enable greeting/farewell detection</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Transcript Panel -->
+            <div class="glass-panel rounded-3xl flex flex-col h-[600px] overflow-hidden">
+                <div class="p-5 border-b border-white/10 flex items-center justify-between bg-black/20">
+                    <h2 class="font-semibold text-lg flex items-center gap-2 glow-text">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>Live Transcript
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="copyTranscript(this)"
+                            class="copy-btn text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 text-slate-300 rounded-lg border border-white/10 transition-all"
+                            title="Copy transcript" aria-label="Copy transcript to clipboard">
+                            📋 Copy
+                        </button>
+                        <span id="wordCount"
+                            class="text-xs text-slate-400 bg-black/20 px-3 py-1 rounded-full border border-white/5">0
+                            words</span>
+                    </div>
+                </div>
+                <div id="transcriptArea" class="flex-1 overflow-y-auto p-5 space-y-4">
+                    <div id="emptyState" class="flex flex-col items-center justify-center h-full text-slate-500">
+                        <svg class="w-16 h-16 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg>
+                        <p>Click "Start Recording" to begin transcription</p>
+                        <p class="text-xs mt-1 opacity-60">Click any line to edit • Or enable Auto Mode</p>
+                    </div>
+                </div>
+                <div id="interimArea"
+                    class="p-4 border-t border-white/10 bg-black/20 text-slate-400 italic text-sm min-h-[40px]"></div>
+            </div>
+
+            <!-- Summary Panel -->
+            <div class="glass-panel rounded-3xl flex flex-col h-[600px] overflow-hidden">
+                <div class="p-5 border-b border-white/10 flex items-center justify-between bg-black/20">
+                    <h2 class="font-semibold text-lg flex items-center gap-2 glow-text">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>Meeting Summary
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="copySummary(this)"
+                            class="copy-btn text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 text-slate-300 rounded-lg border border-white/10 transition-all"
+                            title="Copy summary" aria-label="Copy summary to clipboard">
+                            📋 Copy
+                        </button>
+                        <button onclick="generateSummary()"
+                            class="text-xs px-4 py-2 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 rounded-xl font-medium transition-colors border border-emerald-500/30">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                <div id="summaryArea" class="flex-1 overflow-y-auto p-5">
+                    <div class="flex flex-col items-center justify-center h-full text-slate-500">
+                        <svg class="w-16 h-16 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        <p>Click "Summarize" to generate meeting insights</p>
+                        <p class="text-xs mt-1 opacity-60">TF-IDF TextRank algorithm • Runs locally in milliseconds</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto Mode Customization -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <details class="glass-panel rounded-2xl group cursor-pointer">
+                <summary class="p-5 font-bold text-slate-200 flex items-center justify-between list-none outline-none">
+                    <span class="flex items-center gap-2 glow-text">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Auto Mode Greetings
+                    </span>
+                    <span class="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div class="p-5 pt-0 border-t border-white/10 mt-2 cursor-auto">
+                    <p class="text-xs text-slate-400 mt-3 mb-4">Phrases that trigger auto-start recording. To customize,
+                        edit <code class="px-1.5 py-0.5 bg-black/30 rounded text-blue-300">auto_mode_phrases.json</code>
+                        in the app folder.</p>
+                    <div id="greetTags" class="flex flex-wrap gap-2"></div>
+                </div>
+            </details>
+
+            <details class="glass-panel rounded-2xl group cursor-pointer">
+                <summary class="p-5 font-bold text-slate-200 flex items-center justify-between list-none outline-none">
+                    <span class="flex items-center gap-2 glow-text">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Auto Mode Farewells
+                    </span>
+                    <span class="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div class="p-5 pt-0 border-t border-white/10 mt-2 cursor-auto">
+                    <p class="text-xs text-slate-400 mt-3 mb-4">Phrases that trigger auto-stop countdown. To customize,
+                        edit <code
+                            class="px-1.5 py-0.5 bg-black/30 rounded text-emerald-300">auto_mode_phrases.json</code> in
+                        the app folder.</p>
+                    <div id="fareTags" class="flex flex-wrap gap-2"></div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 mb-4 flex flex-col items-center justify-center">
+            <h2 class="text-2xl md:text-3xl font-extrabold text-[#5c8aef] tracking-wide mb-3" style="text-shadow: 0 0 25px rgba(92, 138, 239, 0.7);">Developed by Parsa Farshadfar</h2>
+            <a href="https://parsafarshadfar.com" target="_blank" class="text-[#60a5fa] hover:text-blue-300 transition-colors text-base font-medium">parsafarshadfar.com</a>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // ==================== STATE ====================
+        let recognition = null, isRecording = false, isPaused = false, transcriptEntries = [], restartTimeout = null;
+        let meetingStartTime = null, meetingEndTime = null, timerInterval = null;
+        let lastSummaryText = null;
+        let pausedDuration = 0, pauseStartedAt = null;
+
+        // Auto Mode state
+        let isAutoMode = false;
+        let autoRecognition = null;
+        let autoRecognitionRestarting = false;
+        let farewellTimeout = null, farewellToastEl = null;
+        let deferredInstallPrompt = null;
+
+        // Default phrases (overridden by auto_mode_phrases.json if available)
+        let GREETING_TRIGGERS = ['hello', 'hi ', ' hi', 'hey ', ' hey', 'good morning', 'hi everyone', 'morning', 'share the screen', 'share screen', 'see the screen', 'can you see my screen', 'can you hear me', 'good afternoon', 'good evening', 'howdy', 'greetings', 'welcome everyone', 'let\'s start', 'shall we begin', 'starting the meeting', 'begin the meeting'];
+        let FAREWELL_TRIGGERS = ['bye', 'goodbye', 'good bye', 'see you', 'take care', 'have a good', 'that\'s all', 'end meeting', 'meeting adjourned', 'thanks everyone', 'thank you everyone', 'that\'s it for today', 'we\'re done', 'meeting is over', 'closing the meeting'];
+
+        const STOP_WORDS = new Set(['the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'need', 'dare', 'ought', 'used', 'to', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 'just', 'and', 'but', 'if', 'or', 'because', 'until', 'while', 'this', 'that', 'these', 'those', 'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'whose', 'am', 'are', 'was', 'were', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must', 'ought']);
+
+        // ==================== THEME SYSTEM ====================
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('meetingTheme', theme);
+            document.querySelectorAll('.theme-dot').forEach(d => {
+                d.classList.toggle('active', d.dataset.themeVal === theme);
+            });
+        }
+        // Load saved theme
+        const savedTheme = localStorage.getItem('meetingTheme');
+        if (savedTheme) setTheme(savedTheme);
+
+        // ==================== MIC BANNER ====================
+        function showMicBannerIfNeeded() {
+            if (window.location.protocol === 'file:' && !localStorage.getItem('micBannerDismissed')) {
+                document.getElementById('micBanner').classList.remove('hidden');
+            }
+        }
+        function dismissMicBanner() {
+            document.getElementById('micBanner').classList.add('hidden');
+            localStorage.setItem('micBannerDismissed', '1');
+        }
+
+        // ==================== LOAD PHRASES FROM JSON ====================
+        async function loadPhrasesFromJSON() {
+            try {
+                const resp = await fetch('./auto_mode_phrases.json');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (Array.isArray(data.greetings) && data.greetings.length > 0) GREETING_TRIGGERS = data.greetings;
+                    if (Array.isArray(data.farewells) && data.farewells.length > 0) FAREWELL_TRIGGERS = data.farewells;
+                }
+            } catch (e) {
+                console.log('Could not load auto_mode_phrases.json, using defaults.');
+            }
+            renderTriggers();
+        }
+
+        // ==================== COPY TO CLIPBOARD ====================
+        function copyTranscript(btn) {
+            if (transcriptEntries.length === 0) { showToast('No transcript to copy', 'warning', 2000); return; }
+            const text = transcriptEntries.map(e => `[${e.time}] ${e.text}`).join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                btn.textContent = '✓ Copied';
+                setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 Copy'; }, 2000);
+            }).catch(() => showToast('Copy failed', 'warning', 2000));
+        }
+
+        function copySummary(btn) {
+            if (!lastSummaryText) { showToast('No summary to copy', 'warning', 2000); return; }
+            navigator.clipboard.writeText(lastSummaryText).then(() => {
+                btn.classList.add('copied');
+                btn.textContent = '✓ Copied';
+                setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 Copy'; }, 2000);
+            }).catch(() => showToast('Copy failed', 'warning', 2000));
+        }
+
+        // ==================== MEETING NAME DETECTION ====================
+        function detectMeetingName() {
+            const title = document.title;
+            const url = window.location.href;
+            let detectedName = '';
+            let source = '';
+
+            if (title && title !== 'Meeting Assistant' && title !== 'New Tab') {
+                const teamsMatch = title.match(/(.+?)\s*\|\s*Microsoft Teams/i);
+                if (teamsMatch) { detectedName = teamsMatch[1].trim(); source = 'Microsoft Teams'; }
+                if (!detectedName) {
+                    const meetMatch = title.match(/(.+?)\s*[-\u2014]\s*Google Meet/i);
+                    if (meetMatch) { detectedName = meetMatch[1].trim(); source = 'Google Meet'; }
+                    else if (url.includes('meet.google.com')) { detectedName = 'Google Meet'; source = 'URL'; }
+                }
+                if (!detectedName) {
+                    const zoomMatch = title.match(/(.+?)\s*[-\u2014]\s*Zoom/i);
+                    if (zoomMatch) { detectedName = zoomMatch[1].trim(); source = 'Zoom'; }
+                    else if (title.includes('Zoom')) { detectedName = 'Zoom Meeting'; source = 'Zoom'; }
+                }
+                if (!detectedName && title.includes('Huddle')) { detectedName = title.replace(/\s*[-\u2014|]\s*Slack.*/i, '').trim() || 'Slack Huddle'; source = 'Slack'; }
+                if (!detectedName && title.includes('Discord')) { detectedName = title.replace(/\s*[-\u2014|]\s*Discord.*/i, '').trim() || 'Discord Call'; source = 'Discord'; }
+                if (!detectedName && title.toLowerCase().includes('webex')) { detectedName = title.replace(/\s*[-\u2014|]\s*Webex.*/i, '').trim() || 'Webex Meeting'; source = 'Webex'; }
+                if (!detectedName) {
+                    const cleaned = title.replace(/\s*[-\u2014|]\s*(Chrome|Edge|Firefox|Browser).*/i, '').trim();
+                    if (cleaned && cleaned.length > 2 && cleaned !== 'New Tab') { detectedName = cleaned; source = 'Browser Tab'; }
+                }
+            }
+            if (!detectedName) {
+                if (url.includes('teams.microsoft.com')) { detectedName = 'Teams Meeting'; source = 'URL'; }
+                else if (url.includes('zoom.us')) { detectedName = 'Zoom Meeting'; source = 'URL'; }
+                else if (url.includes('webex.com')) { detectedName = 'Webex Meeting'; source = 'URL'; }
+            }
+
+            const input = document.getElementById('meetingName');
+            const sourceDiv = document.getElementById('detectedSource');
+            if (detectedName && detectedName.length > 1) {
+                input.value = detectedName;
+                sourceDiv.textContent = `Detected from ${source}: "${detectedName}"`;
+                sourceDiv.className = 'text-xs text-emerald-400 mt-2';
+                saveToStorage();
+            } else {
+                sourceDiv.textContent = 'Could not auto-detect. Please enter manually.';
+                sourceDiv.className = 'text-xs text-amber-400 mt-2';
+            }
+        }
+        setTimeout(detectMeetingName, 500);
+
+        // ==================== TIMER ====================
+        function startTimer() {
+            meetingStartTime = new Date();
+            pausedDuration = 0;
+            pauseStartedAt = null;
+            timerInterval = setInterval(() => {
+                if (isPaused) return;
+                const now = new Date();
+                const diff = Math.floor((now - meetingStartTime - pausedDuration) / 1000);
+                const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+                const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                const s = String(diff % 60).padStart(2, '0');
+                document.getElementById('meetingTimer').textContent = `${h}:${m}:${s}`;
+            }, 1000);
+            document.getElementById('startTimeDisplay').textContent = formatTime(meetingStartTime);
+            document.getElementById('meetingTimeRange').classList.remove('hidden');
+        }
+        function stopTimer() {
+            meetingEndTime = new Date();
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('endTimeDisplay').textContent = formatTime(meetingEndTime);
+        }
+        function formatTime(date) { return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+        function formatTimeForFilename(date) { return `${String(date.getHours()).padStart(2, '0')}-${String(date.getMinutes()).padStart(2, '0')}`; }
+        function formatDateForFilename(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
+
+        // ==================== SPEECH RECOGNITION ====================
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert('Your browser does not support speech recognition. Please use Chrome or Edge.');
+        }
+
+        function getRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SpeechRecognition();
+            rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+            rec.onstart = () => { isRecording = true; updateUIState('recording'); };
+            rec.onend = () => {
+                if (isRecording && !isPaused) {
+                    restartTimeout = setTimeout(() => { if (isRecording && !isPaused) { try { recognition.start(); } catch (e) { } } }, 300);
+                } else if (!isRecording) { updateUIState('stopped'); }
+            };
+            rec.onresult = (event) => {
+                if (isPaused) return;
+                let interim = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) addTranscriptLine(transcript);
+                    else interim += transcript;
+                }
+                document.getElementById('interimArea').textContent = interim;
+            };
+            rec.onerror = (event) => {
+                if (event.error === 'no-speech') return;
+                if (event.error === 'audio-capture') { alert('No microphone found.'); stopRecording(); }
+                else if (event.error === 'not-allowed') { alert('Microphone permission denied.'); stopRecording(); }
+            };
+            return rec;
+        }
+
+        function startRecording() {
+            if (isRecording) return;
+            isPaused = false;
+            if (isAutoMode && autoRecognition) {
+                isRecording = true;
+                document.getElementById('emptyState')?.remove();
+                startTimer();
+                updateUIState('recording');
+                return;
+            }
+            const lang = document.getElementById('languageSelect').value;
+            recognition = getRecognition(); recognition.lang = lang;
+            try {
+                recognition.start();
+                document.getElementById('emptyState')?.remove();
+                startTimer();
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        // ==================== PAUSE / RESUME ====================
+        function togglePause() {
+            if (!isRecording) return;
+            isPaused = !isPaused;
+            const btn = document.getElementById('pauseBtn');
+            const icon = document.getElementById('pauseIcon');
+            const text = document.getElementById('pauseBtnText');
+            const badge = document.getElementById('statusBadge');
+
+            if (isPaused) {
+                pauseStartedAt = Date.now();
+                text.textContent = 'Resume';
+                icon.innerHTML = '<polygon points="5,3 19,12 5,21" fill="currentColor"/>';
+                btn.classList.remove('from-amber-600', 'to-yellow-500', 'hover:from-amber-500', 'hover:to-yellow-400');
+                btn.classList.add('from-emerald-600', 'to-green-500', 'hover:from-emerald-500', 'hover:to-green-400');
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-amber-900/30 text-amber-400 border border-amber-800 paused-indicator';
+                badge.textContent = '⏸ Paused';
+                document.getElementById('interimArea').textContent = '';
+                // Stop recognition to release mic while paused
+                if (!isAutoMode && recognition) { try { recognition.stop(); } catch (e) { } }
+                showToast('⏸ Recording paused', 'warning', 2000);
+            } else {
+                if (pauseStartedAt) { pausedDuration += Date.now() - pauseStartedAt; pauseStartedAt = null; }
+                text.textContent = 'Pause';
+                icon.innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>';
+                btn.classList.remove('from-emerald-600', 'to-green-500', 'hover:from-emerald-500', 'hover:to-green-400');
+                btn.classList.add('from-amber-600', 'to-yellow-500', 'hover:from-amber-500', 'hover:to-yellow-400');
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-red-900/30 text-red-400 border border-red-800 recording-indicator';
+                badge.textContent = '● Recording';
+                // Restart recognition
+                if (!isAutoMode && recognition) { try { recognition.start(); } catch (e) { } }
+                showToast('▶ Recording resumed', 'success', 2000);
+            }
+        }
+
+        function stopRecording(fromAuto = false) {
+            if (!isRecording) return;
+            isRecording = false;
+            isPaused = false;
+            document.getElementById('interimArea').textContent = '';
+            stopTimer();
+            updateUIState('stopped');
+            if (isAutoMode && autoRecognition) {
+                setAutoStatus('standby-pulse text-amber-400', '🎙 Listening for greeting...');
+            } else {
+                if (restartTimeout) clearTimeout(restartTimeout);
+                if (recognition) { try { recognition.stop(); } catch (e) { } recognition = null; }
+            }
+            if (transcriptEntries.length > 0) {
+                const totalText = transcriptEntries.map(e => e.text).join(' ');
+                if (totalText.length >= 30) generateSummary();
+                if (fromAuto) {
+                    setTimeout(async () => { await autoSaveAndClear(); }, 400);
+                }
+            } else if (fromAuto) {
+                setTimeout(() => {
+                    silentClearAll();
+                    if (isAutoMode) setAutoStatus('standby-pulse text-amber-400', '🎙 Listening for greeting...');
+                }, 1000);
+            }
+        }
+
+        function updateUIState(state) {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const pulseRing = document.getElementById('pulseRing');
+            const badge = document.getElementById('statusBadge');
+            if (state === 'recording') {
+                startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden'); pauseBtn.classList.remove('hidden');
+                pulseRing.classList.remove('hidden');
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-red-900/30 text-red-400 border border-red-800 recording-indicator';
+                badge.textContent = '● Recording';
+                // Reset pause button state
+                document.getElementById('pauseBtnText').textContent = 'Pause';
+                document.getElementById('pauseIcon').innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>';
+                pauseBtn.classList.remove('from-emerald-600', 'to-green-500', 'hover:from-emerald-500', 'hover:to-green-400');
+                pauseBtn.classList.add('from-amber-600', 'to-yellow-500', 'hover:from-amber-500', 'hover:to-yellow-400');
+            } else {
+                startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); pauseBtn.classList.add('hidden');
+                pulseRing.classList.add('hidden');
+                badge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700';
+                badge.textContent = 'Ready';
+            }
+        }
+
+        // ==================== AUTO MODE ====================
+        async function toggleAutoMode() {
+            isAutoMode = !isAutoMode;
+            const btn = document.getElementById('autoModeBtn');
+            const thumb = document.getElementById('autoModeThumb');
+            if (isAutoMode) {
+                btn.classList.replace('bg-slate-600', 'bg-blue-600');
+                thumb.classList.add('translate-x-6'); thumb.classList.remove('translate-x-1');
+                btn.setAttribute('aria-checked', 'true');
+                initAutoRecognition();
+                showToast('Auto Mode ON — listening for greeting words...', 'info', 4000);
+            } else {
+                btn.classList.replace('bg-blue-600', 'bg-slate-600');
+                thumb.classList.remove('translate-x-6'); thumb.classList.add('translate-x-1');
+                btn.setAttribute('aria-checked', 'false');
+                destroyAutoRecognition();
+                cancelFarewellCountdown();
+                if (isRecording) {
+                    isRecording = false;
+                    document.getElementById('interimArea').textContent = '';
+                    stopTimer(); updateUIState('stopped');
+                }
+                document.getElementById('autoModeStatus').innerHTML = '<span>Off — toggle to enable greeting/farewell detection</span>';
+                showToast('Auto Mode OFF', 'info', 2000);
+            }
+        }
+
+        function initAutoRecognition() {
+            if (autoRecognition) return;
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            autoRecognition = new SR();
+            autoRecognition.continuous = true;
+            autoRecognition.interimResults = true;
+            autoRecognition.maxAlternatives = 1;
+            autoRecognition.lang = document.getElementById('languageSelect').value;
+
+            autoRecognition.onresult = (ev) => {
+                if (isPaused) return;
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    const transcript = ev.results[i][0].transcript;
+                    const textLower = transcript.toLowerCase();
+                    if (isRecording) {
+                        if (ev.results[i].isFinal) addTranscriptLine(transcript);
+                    } else {
+                        if (GREETING_TRIGGERS.some(w => textLower.includes(w))) {
+                            isRecording = true;
+                            document.getElementById('emptyState')?.remove();
+                            startTimer(); updateUIState('recording');
+                            setAutoStatus('text-red-400 recording-indicator', '● Recording (auto-started)');
+                            showToast('🎙 Meeting started — greeting detected!', 'success', 4000);
+                            return;
+                        }
+                    }
+                }
+                if (isRecording) {
+                    let interim = '';
+                    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                        if (!ev.results[i].isFinal) interim += ev.results[i][0].transcript;
+                    }
+                    document.getElementById('interimArea').textContent = interim;
+                }
+            };
+
+            autoRecognition.onend = () => {
+                if (isAutoMode && autoRecognition && !autoRecognitionRestarting) {
+                    autoRecognitionRestarting = true;
+                    setTimeout(() => {
+                        autoRecognitionRestarting = false;
+                        if (isAutoMode && autoRecognition) { try { autoRecognition.start(); } catch (e) { } }
+                    }, 300);
+                }
+            };
+
+            autoRecognition.onerror = (ev) => {
+                if (ev.error === 'no-speech' || ev.error === 'aborted') return;
+                if (ev.error === 'not-allowed') {
+                    showToast('Mic permission denied. Auto Mode disabled.', 'warning', 5000);
+                    autoRecognition = null;
+                    toggleAutoMode();
+                }
+            };
+
+            setAutoStatus('standby-pulse text-amber-400', '🎙 Listening for greeting...');
+            try { autoRecognition.start(); } catch (e) { }
+        }
+
+        function destroyAutoRecognition() {
+            if (autoRecognition) { try { autoRecognition.abort(); } catch (e) { } autoRecognition = null; }
+            autoRecognitionRestarting = false;
+        }
+
+        function checkFarewellWords(text) {
+            if (!isAutoMode || !isRecording || farewellTimeout) return;
+            const lower = text.toLowerCase();
+            if (FAREWELL_TRIGGERS.some(w => lower.includes(w))) startFarewellCountdown();
+        }
+
+        function startFarewellCountdown() {
+            let remaining = 10;
+            farewellToastEl = showToastPersistent(
+                `👋 Farewell detected — stopping in <b>${remaining}s</b> &nbsp;<button onclick="cancelFarewellCountdown()" style="background:#334155;border:none;color:#94a3b8;padding:2px 8px;border-radius:6px;cursor:pointer;font-size:11px;">Cancel</button>`, 'countdown'
+            );
+            const interval = setInterval(() => {
+                remaining--;
+                if (farewellToastEl) {
+                    const msg = farewellToastEl.querySelector('span');
+                    if (msg) msg.innerHTML = `👋 Farewell detected — stopping in <b>${remaining}s</b> &nbsp;<button onclick="cancelFarewellCountdown()" style="background:#334155;border:none;color:#94a3b8;padding:2px 8px;border-radius:6px;cursor:pointer;font-size:11px;">Cancel</button>`;
+                }
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    if (farewellTimeout !== null) {
+                        stopRecording(true);
+                        dismissToast(farewellToastEl);
+                        farewellToastEl = null; farewellTimeout = null;
+                    }
+                }
+            }, 1000);
+            farewellTimeout = interval;
+        }
+
+        function cancelFarewellCountdown() {
+            if (farewellTimeout) { clearInterval(farewellTimeout); farewellTimeout = null; }
+            if (farewellToastEl) { dismissToast(farewellToastEl); farewellToastEl = null; }
+            showToast('Auto-stop cancelled', 'info', 2000);
+        }
+
+        function setAutoStatus(cls, html) {
+            const el = document.getElementById('autoModeStatus');
+            el.className = `text-xs flex items-center gap-2 ${cls}`;
+            el.innerHTML = `<span>${html}</span>`;
+        }
+
+        function renderTriggers() {
+            const greetContainer = document.getElementById('greetTags');
+            const fareContainer = document.getElementById('fareTags');
+            if (greetContainer) {
+                greetContainer.innerHTML = GREETING_TRIGGERS.map(t =>
+                    `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">${escapeHtml(t.trim())}</span>`
+                ).join('');
+            }
+            if (fareContainer) {
+                fareContainer.innerHTML = FAREWELL_TRIGGERS.map(t =>
+                    `<span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs">${escapeHtml(t.trim())}</span>`
+                ).join('');
+            }
+        }
+
+        // ==================== AUTO-SAVE ====================
+        async function autoSaveAndClear() {
+            const { content, filename } = buildExportContent();
+            triggerDownload(content, filename);
+            showToast(`💾 Downloaded: ${filename}`, 'success', 5000);
+            setTimeout(() => {
+                silentClearAll();
+                if (isAutoMode) setAutoStatus('standby-pulse text-amber-400', '🎙 Listening for greeting...');
+            }, 1500);
+        }
+
+        // ==================== TOAST SYSTEM ====================
+        function showToast(msg, type = 'info', duration = 3000) {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => dismissToast(t), duration);
+            return t;
+        }
+        function showToastPersistent(msg, type = 'info') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span>${msg}</span>`;
+            c.appendChild(t);
+            return t;
+        }
+        function dismissToast(el) {
+            if (!el || !el.parentNode) return;
+            el.classList.add('leaving');
+            setTimeout(() => el.remove(), 300);
+        }
+
+        // ==================== PWA INSTALL ====================
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstallPrompt = e; document.getElementById('installBtn').classList.remove('hidden'); });
+        window.addEventListener('appinstalled', () => { document.getElementById('installBtn').classList.add('hidden'); deferredInstallPrompt = null; });
+        function installPWA() {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            deferredInstallPrompt.userChoice.then(() => { deferredInstallPrompt = null; });
+        }
+
+        // ==================== TRANSCRIPT ====================
+        function createTranscriptLineElement(entry) {
+            const div = document.createElement('div');
+            div.className = 'transcript-line group p-4 rounded-2xl bg-black/20 border border-white/5 backdrop-blur-sm';
+            div.dataset.id = entry.id;
+            div.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 mt-1">
+                        <svg class="w-5 h-5 text-blue-400 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="text-xs font-medium text-slate-400 mb-1 block">${entry.time}</span>
+                        <p class="transcript-text text-slate-200 text-sm leading-relaxed" data-entry-id="${entry.id}" onclick="editTranscriptLine(this)" title="Click to edit">${escapeHtml(entry.text)}</p>
+                    </div>
+                    <button onclick="deleteEntry(${entry.id})" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-400 transition-opacity flex-shrink-0" aria-label="Delete transcript line">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>`;
+            return div;
+        }
+
+        function addTranscriptLine(text) {
+            const area = document.getElementById('transcriptArea');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const id = Date.now();
+            const entry = { id, time, text };
+            transcriptEntries.push(entry);
+
+            const div = createTranscriptLineElement(entry);
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+            updateWordCount();
+            saveToStorage();
+            checkFarewellWords(text);
+        }
+
+        // ==================== EDITABLE TRANSCRIPT ====================
+        function editTranscriptLine(el) {
+            if (el.contentEditable === 'true') return; // Already editing
+            el.contentEditable = 'true';
+            el.focus();
+            // Select all text
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            function finishEdit() {
+                el.contentEditable = 'false';
+                const entryId = parseInt(el.dataset.entryId);
+                const entry = transcriptEntries.find(e => e.id === entryId);
+                if (entry) {
+                    entry.text = el.textContent.trim();
+                    saveToStorage();
+                    updateWordCount();
+                }
+                el.removeEventListener('blur', finishEdit);
+                el.removeEventListener('keydown', handleKey);
+            }
+            function handleKey(e) {
+                if (e.key === 'Enter') { e.preventDefault(); finishEdit(); }
+                if (e.key === 'Escape') { el.textContent = transcriptEntries.find(en => en.id === parseInt(el.dataset.entryId))?.text || ''; finishEdit(); }
+            }
+            el.addEventListener('blur', finishEdit);
+            el.addEventListener('keydown', handleKey);
+        }
+
+        function deleteEntry(id) {
+            const el = document.querySelector(`[data-id="${id}"]`);
+            if (el) el.remove();
+            transcriptEntries = transcriptEntries.filter(e => e.id !== id);
+            updateWordCount();
+            saveToStorage();
+        }
+
+        function updateWordCount() {
+            const text = transcriptEntries.map(e => e.text).join(' ');
+            const count = text.split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('wordCount').textContent = `${count} words`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== ENHANCED TEXTRANK SUMMARIZATION ====================
+        function tokenizeSentences(text) {
+            // Split on sentence-ending punctuation, but also handle newlines and long phrases without punctuation
+            const raw = text.match(/[^.!?\n]+[.!?]+|[^.!?\n]{15,}/g) || [text];
+            return raw.map(s => s.trim()).filter(s => s.length > 0);
+        }
+        function tokenizeWords(text) { return text.toLowerCase().match(/\b[a-z]{2,}\b/g) || []; }
+        function removeStopWords(words) { return words.filter(w => !STOP_WORDS.has(w) && w.length > 2); }
+
+        // --- TF-IDF computation ---
+        function computeTFIDF(sentences) {
+            const n = sentences.length;
+            const sentenceWords = sentences.map(s => removeStopWords(tokenizeWords(s)));
+            // Build vocabulary
+            const vocabSet = new Set();
+            sentenceWords.forEach(words => words.forEach(w => vocabSet.add(w)));
+            const vocab = [...vocabSet];
+            const vocabIndex = {};
+            vocab.forEach((w, i) => { vocabIndex[w] = i; });
+
+            // Document frequency
+            const df = new Array(vocab.length).fill(0);
+            sentenceWords.forEach(words => {
+                const seen = new Set(words);
+                seen.forEach(w => { if (vocabIndex[w] !== undefined) df[vocabIndex[w]]++; });
+            });
+
+            // IDF (smoothed)
+            const idf = df.map(d => Math.log((n + 1) / (d + 1)) + 1);
+
+            // TF-IDF vectors per sentence
+            const vectors = sentenceWords.map(words => {
+                const vec = new Array(vocab.length).fill(0);
+                const tf = {};
+                words.forEach(w => { tf[w] = (tf[w] || 0) + 1; });
+                const maxTF = Math.max(...Object.values(tf), 1);
+                Object.entries(tf).forEach(([w, count]) => {
+                    const idx = vocabIndex[w];
+                    if (idx !== undefined) vec[idx] = (0.5 + 0.5 * count / maxTF) * idf[idx];
+                });
+                return vec;
+            });
+            return { vectors, vocab };
+        }
+
+        function cosineSimilarity(a, b) {
+            let dot = 0, normA = 0, normB = 0;
+            for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; normA += a[i] * a[i]; normB += b[i] * b[i]; }
+            if (normA === 0 || normB === 0) return 0;
+            return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        function pageRank(graph, damping = 0.85, iterations = 30, epsilon = 0.0001) {
+            const n = graph.length;
+            if (n === 0) return [];
+            let scores = new Array(n).fill(1 / n);
+            const outDegrees = graph.map(row => row.reduce((a, b) => a + b, 0));
+            for (let iter = 0; iter < iterations; iter++) {
+                const newScores = new Array(n).fill((1 - damping) / n);
+                let maxDiff = 0;
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        if (graph[j][i] > 0 && outDegrees[j] > 0) newScores[i] += damping * scores[j] * graph[j][i] / outDegrees[j];
+                    }
+                    maxDiff = Math.max(maxDiff, Math.abs(newScores[i] - scores[i]));
+                }
+                scores = newScores;
+                if (maxDiff < epsilon) break;
+            }
+            return scores;
+        }
+
+        // --- Position bias: U-shaped curve favoring start and end of meeting ---
+        function positionWeight(idx, total) {
+            if (total <= 1) return 1;
+            const pos = idx / (total - 1); // 0..1
+            // U-curve: boost first 15% and last 15%, slightly penalize middle
+            return 0.7 + 0.3 * (4 * (pos - 0.5) * (pos - 0.5)); // min 0.7 at center, 1.0 at edges
+        }
+
+        // --- Sentence length penalty ---
+        function lengthWeight(sentence) {
+            const wordCount = tokenizeWords(sentence).length;
+            if (wordCount < 5) return 0.5;     // Too short, likely fragment
+            if (wordCount > 40) return 0.7;     // Too long, likely rambling
+            if (wordCount >= 8 && wordCount <= 30) return 1.0; // Sweet spot
+            return 0.85; // 5-7 or 31-40 words
+        }
+
+        // --- Adaptive ratio based on transcript length ---
+        function adaptiveRatio(sentenceCount) {
+            if (sentenceCount <= 10) return { count: Math.min(3, sentenceCount), ratio: null };
+            if (sentenceCount <= 30) return { count: null, ratio: 0.30 };
+            if (sentenceCount <= 80) return { count: null, ratio: 0.20 };
+            return { count: Math.min(15, Math.ceil(sentenceCount * 0.15)), ratio: null };
+        }
+
+        // --- Near-duplicate removal using Jaccard similarity ---
+        function removeDuplicateSentences(sentences) {
+            const unique = [];
+            const wordSets = sentences.map(s => new Set(removeStopWords(tokenizeWords(s))));
+            for (let i = 0; i < sentences.length; i++) {
+                let isDupe = false;
+                for (let j = 0; j < unique.length; j++) {
+                    const setA = wordSets[i];
+                    const setB = new Set(removeStopWords(tokenizeWords(unique[j])));
+                    const intersection = [...setA].filter(w => setB.has(w)).length;
+                    const union = new Set([...setA, ...setB]).size;
+                    if (union > 0 && intersection / union > 0.7) { isDupe = true; break; }
+                }
+                if (!isDupe) unique.push(sentences[i]);
+            }
+            return unique;
+        }
+
+        function detectEntities(text) {
+            const entities = [];
+            const nameMatches = text.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+            const excludeNames = new Set(['The', 'A', 'An', 'This', 'That', 'These', 'Those', 'We', 'You', 'They', 'He', 'She', 'It', 'I', 'Me', 'My', 'Our', 'Your', 'Their', 'His', 'Her', 'Its', 'And', 'But', 'Or', 'If', 'For', 'On', 'At', 'To', 'From', 'By', 'With', 'In', 'Out', 'Up', 'Down', 'Over', 'Under', 'Again', 'Further', 'Then', 'Once', 'Here', 'There', 'When', 'Where', 'Why', 'How', 'All', 'Any', 'Both', 'Each', 'Few', 'More', 'Most', 'Other', 'Some', 'Such', 'No', 'Nor', 'Not', 'Only', 'Own', 'Same', 'So', 'Than', 'Too', 'Very', 'Just', 'Now', 'Today', 'Tomorrow', 'Yesterday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']);
+            if (nameMatches) entities.push(...nameMatches.filter(n => !excludeNames.has(n)));
+            const orgMatches = text.match(/\b[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*\s+(?:Inc\.?|Corp\.?|Ltd\.?|LLC|Company|Co\.?|Group|Organization|Foundation|Institute|University|College|Bank|Tech|Systems|Solutions|Services)\b/g);
+            if (orgMatches) entities.push(...orgMatches);
+            const dateMatches = text.match(/\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:st|nd|rd|th)?(?:,\s+\d{4})?\b/gi);
+            if (dateMatches) entities.push(...dateMatches);
+            const dateMatches2 = text.match(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g);
+            if (dateMatches2) entities.push(...dateMatches2);
+            const moneyMatches = text.match(/\$\d+(?:,\d{3})*(?:\.\d{2})?\b/g);
+            if (moneyMatches) entities.push(...moneyMatches);
+            const pctMatches = text.match(/\b\d+(?:\.\d+)?%\b/g);
+            if (pctMatches) entities.push(...pctMatches);
+            return [...new Set(entities)];
+        }
+
+        // --- Improved topic detection with proper labels ---
+        function detectTopics(sentences, numTopics = 4) {
+            if (sentences.length < 4) return [];
+            const clusters = []; const used = new Set();
+            for (let i = 0; i < sentences.length; i++) {
+                if (used.has(i)) continue;
+                const cluster = [i];
+                const words1 = new Set(removeStopWords(tokenizeWords(sentences[i])));
+                used.add(i);
+                for (let j = i + 1; j < sentences.length; j++) {
+                    if (used.has(j)) continue;
+                    const words2 = new Set(removeStopWords(tokenizeWords(sentences[j])));
+                    const intersection = [...words1].filter(w => words2.has(w));
+                    const union = new Set([...words1, ...words2]);
+                    if (intersection.length / union.size > 0.15) { cluster.push(j); used.add(j); }
+                }
+                clusters.push(cluster);
+            }
+            return clusters.filter(c => c.length >= 2).slice(0, numTopics).map(cluster => {
+                const wordCounts = {};
+                cluster.forEach(idx => { removeStopWords(tokenizeWords(sentences[idx])).forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; }); });
+                const topWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+                // Capitalize each word for a proper label
+                const label = topWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(', ');
+                return { label, words: topWords, sentences: cluster, count: cluster.length };
+            }).filter(t => t.words.length > 0);
+        }
+
+        // --- Main TextRank summarizer with all enhancements ---
+        function summarizeTextRank(text) {
+            const sentences = tokenizeSentences(text).map(s => s.trim()).filter(s => s.length > 10);
+            if (sentences.length < 3) return finalizeSummary(sentences, sentences, sentences.length);
+
+            // Step 1: Near-duplicate removal
+            const dedupedSentences = removeDuplicateSentences(sentences);
+
+            // Step 2: TF-IDF vectors
+            const { vectors } = computeTFIDF(dedupedSentences);
+            const n = dedupedSentences.length;
+
+            // Step 3: Build similarity graph
+            const graph = Array(n).fill(null).map(() => Array(n).fill(0));
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    if (i !== j) graph[i][j] = cosineSimilarity(vectors[i], vectors[j]);
+                }
+            }
+
+            // Step 4: PageRank
+            const rawScores = pageRank(graph);
+
+            // Step 5: Apply position bias + length weight
+            const finalScores = rawScores.map((score, idx) => {
+                return score * positionWeight(idx, n) * lengthWeight(dedupedSentences[idx]);
+            });
+
+            // Step 6: Adaptive selection
+            const { count, ratio } = adaptiveRatio(dedupedSentences.length);
+            const numSummary = count || Math.max(3, Math.ceil(dedupedSentences.length * ratio));
+
+            // Step 7: Select top sentences, preserve original order
+            const scored = finalScores.map((score, idx) => ({ score, idx, sent: dedupedSentences[idx] }));
+            const top = scored.sort((a, b) => b.score - a.score).slice(0, numSummary);
+            const topSorted = top.sort((a, b) => a.idx - b.idx);
+
+            return finalizeSummary(dedupedSentences, topSorted.map(x => x.sent), sentences.length);
+        }
+
+        function finalizeSummary(allSentences, keyPoints, originalSentenceCount) {
+            // Synthesize overview from top 3 key points
+            const overviewSentences = keyPoints.slice(0, 3);
+            const overview = overviewSentences.join(' ').replace(/\s+/g, ' ').trim();
+
+            const fullText = allSentences.join(' ');
+
+            // --- Improved action item extraction with weighted scoring ---
+            const strongActionPatterns = [/\b(action item|follow up|follow-up|deadline|todo|to-do)\b/i, /\b(assigned to|responsible for|take care of)\b/i];
+            const mediumActionPatterns = [/\b(need to|needs to|needed to|have to|has to|must)\b/i, /\b(should|going to|plan to|scheduled to)\b/i];
+            const weakActionPatterns = [/\b(will|prepare|send|email|call|contact|look into|research|handle|review|update)\b/i];
+
+            let actionItems = allSentences.filter(s => s.length > 15).map(s => {
+                let score = 0;
+                if (strongActionPatterns.some(p => p.test(s))) score += 3;
+                if (mediumActionPatterns.some(p => p.test(s))) score += 2;
+                if (weakActionPatterns.some(p => p.test(s))) score += 1;
+                return { text: s, score };
+            }).filter(item => item.score >= 2) // Only medium+ confidence
+              .sort((a, b) => b.score - a.score);
+
+            // De-duplicate action items
+            actionItems = removeDuplicateSentences(actionItems.map(i => i.text));
+
+            // Decisions
+            const decisions = allSentences.filter(s => /\b(decided|decision|agreed|concluded|resolved|approved|chosen|selected|opted|vote)\b/i.test(s) && s.length > 15);
+            const questions = allSentences.filter(s => s.includes('?'));
+            const entities = detectEntities(fullText);
+            const topics = detectTopics(allSentences);
+
+            return { overview, keyPoints, actionItems, decisions, questions, entities, topics, originalSentenceCount, summarySentenceCount: keyPoints.length };
+        }
+
+        function generateSummary() {
+            const text = transcriptEntries.map(e => e.text).join(' ');
+            if (text.length < 30) { alert('Transcript too short to summarize.'); return; }
+            const startTime = performance.now();
+            const summary = summarizeTextRank(text);
+            const elapsed = (performance.now() - startTime).toFixed(1);
+            const area = document.getElementById('summaryArea');
+            const time = new Date().toLocaleString();
+            const compressionPct = summary.originalSentenceCount > 0
+                ? Math.round((1 - summary.summarySentenceCount / summary.originalSentenceCount) * 100)
+                : 0;
+
+            let html = `<div class="space-y-5">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <span class="text-xs text-slate-400">Generated ${time} • ${elapsed}ms</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg border border-emerald-500/30">${summary.originalSentenceCount} → ${summary.summarySentenceCount} sentences (${compressionPct}% compressed)</span>
+                        <span class="text-xs px-2 py-1 bg-blue-500/20 text-blue-300 rounded-lg border border-blue-500/30">TF-IDF TextRank</span>
+                    </div>
+                </div>`;
+
+            if (summary.topics.length > 0) {
+                html += `<div class="flex flex-wrap gap-2 items-center"><span class="text-xs text-slate-400 mr-1">Topics:</span>`;
+                summary.topics.forEach(t => { html += `<span class="topic-tag">${escapeHtml(t.label)} <span class="opacity-50 ml-1">(${t.count})</span></span>`; });
+                html += `</div>`;
+            }
+
+            html += `<div class="glass-panel rounded-2xl p-5 border-white/10">
+                <h3 class="text-sm font-bold text-emerald-400 mb-3 flex items-center gap-2 glow-text">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Overview
+                </h3>
+                <p class="text-sm text-slate-200 leading-relaxed">${escapeHtml(summary.overview)}</p>
+            </div>`;
+
+            // Key Points section (NEW)
+            if (summary.keyPoints.length > 0) {
+                html += `<div class="glass-panel rounded-2xl p-5 border-white/10">
+                    <h3 class="text-sm font-bold text-blue-400 mb-3 flex items-center gap-2 glow-text">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Key Points
+                    </h3>
+                    <ul class="space-y-2.5">${summary.keyPoints.slice(0, 8).map(p => `<li class="flex items-start gap-2.5 text-sm text-slate-200"><span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0 shadow-[0_0_8px_#3b82f6]"></span><span class="leading-relaxed">${escapeHtml(p)}</span></li>`).join('')}</ul>
+                </div>`;
+            }
+
+            if (summary.actionItems.length > 0) {
+                html += `<div class="glass-panel rounded-2xl p-5 border-white/10">
+                    <h3 class="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2 glow-text">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>Action Items
+                    </h3>
+                    <ul class="space-y-2.5">${summary.actionItems.slice(0, 8).map(a => `<li class="flex items-start gap-2.5 text-sm text-slate-200"><span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0 shadow-[0_0_8px_#f43f5e]"></span><span class="leading-relaxed">${escapeHtml(a)}</span></li>`).join('')}</ul>
+                </div>`;
+            }
+
+            if (summary.questions.length > 0) {
+                html += `<div class="glass-panel rounded-2xl p-5 border-white/10">
+                    <h3 class="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2 glow-text">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Questions Raised
+                    </h3>
+                    <ul class="space-y-2.5">${summary.questions.slice(0, 5).map(q => `<li class="flex items-start gap-2.5 text-sm text-slate-200"><span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0 shadow-[0_0_8px_cyan]"></span><span class="leading-relaxed">${escapeHtml(q)}</span></li>`).join('')}</ul>
+                </div>`;
+            }
+
+            if (summary.decisions.length > 0) {
+                html += `<div class="glass-panel rounded-2xl p-5 border-white/10">
+                    <h3 class="text-sm font-bold text-amber-400 mb-3 flex items-center gap-2 glow-text">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Decisions Made
+                    </h3>
+                    <ul class="space-y-2.5">${summary.decisions.map(d => `<li class="flex items-start gap-2.5 text-sm text-slate-200"><span class="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0 shadow-[0_0_8px_orange]"></span><span class="leading-relaxed">${escapeHtml(d)}</span></li>`).join('')}</ul>
+                </div>`;
+            }
+
+            if (summary.entities.length > 0) {
+                html += `<div class="flex flex-wrap gap-2 items-center"><span class="text-xs text-slate-400 mr-1">Entities:</span>`;
+                summary.entities.slice(0, 12).forEach(e => { html += `<span class="entity-tag">${escapeHtml(e)}</span>`; });
+                html += `</div>`;
+            }
+
+            html += '</div>';
+            area.innerHTML = html;
+
+            // Build plaintext for copy/export
+            let txt = 'OVERVIEW\n' + summary.overview + '\n';
+            if (summary.keyPoints.length > 0) txt += '\nKEY POINTS\n' + summary.keyPoints.slice(0, 8).map(p => '• ' + p).join('\n') + '\n';
+            if (summary.actionItems.length > 0) txt += '\nACTION ITEMS\n' + summary.actionItems.slice(0, 8).map(a => '• ' + a).join('\n') + '\n';
+            if (summary.questions.length > 0) txt += '\nQUESTIONS RAISED\n' + summary.questions.slice(0, 5).map(q => '• ' + q).join('\n') + '\n';
+            if (summary.decisions.length > 0) txt += '\nDECISIONS MADE\n' + summary.decisions.map(d => '• ' + d).join('\n') + '\n';
+            if (summary.topics.length > 0) txt += '\nTOPICS\n' + summary.topics.map(t => '• ' + t.label).join('\n') + '\n';
+            if (summary.entities.length > 0) txt += '\nENTITIES\n' + summary.entities.slice(0, 12).join(', ') + '\n';
+            txt += `\n[${summary.originalSentenceCount} → ${summary.summarySentenceCount} sentences, ${compressionPct}% compressed]`;
+            lastSummaryText = txt;
+        }
+
+        // ==================== EXPORT ====================
+        function buildExportContent() {
+            let meetingName = document.getElementById('meetingName').value.trim() || 'Meeting';
+            meetingName = meetingName.replace(/[\/:*?"<>|]/g, '_').replace(/\s+/g, '_');
+            let dateStr, startStr, endStr;
+            if (meetingStartTime) { dateStr = formatDateForFilename(meetingStartTime); startStr = formatTimeForFilename(meetingStartTime); }
+            else { const now = new Date(); dateStr = formatDateForFilename(now); startStr = formatTimeForFilename(now); }
+            if (meetingEndTime) endStr = formatTimeForFilename(meetingEndTime);
+            else if (meetingStartTime) endStr = formatTimeForFilename(new Date());
+            else endStr = startStr;
+
+            const filename = `${dateStr}__${startStr}_${endStr}_${meetingName}.txt`;
+            let content = '';
+            if (lastSummaryText) content += `MEETING SUMMARY\n===============\n\n${lastSummaryText}\n\n================================================\n\n`;
+            content += `MEETING TRANSCRIPT\n==================\n`;
+            content += `Meeting Name: ${document.getElementById('meetingName').value || 'Untitled Meeting'}\n`;
+            if (meetingStartTime) content += `Start Time: ${meetingStartTime.toLocaleString()}\n`;
+            if (meetingEndTime) content += `End Time: ${meetingEndTime.toLocaleString()}\n`;
+            if (meetingStartTime && meetingEndTime) {
+                const duration = Math.floor((meetingEndTime - meetingStartTime) / 60000);
+                content += `Duration: ${Math.floor(duration / 60)}h ${duration % 60}m\n`;
+            }
+            content += `\n`;
+            transcriptEntries.forEach(e => { content += `[${e.time}] ${e.text}\n\n`; });
+            return { content, filename };
+        }
+
+        function triggerDownload(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+        }
+
+        function exportTxt() {
+            if (transcriptEntries.length === 0) { alert('No transcript to export.'); return; }
+            const { content, filename } = buildExportContent();
+            triggerDownload(content, filename);
+        }
+
+        function clearAll() {
+            if (!confirm('Clear all data?')) return;
+            silentClearAll();
+        }
+
+        function silentClearAll() {
+            transcriptEntries = [];
+            lastSummaryText = null;
+            meetingStartTime = null;
+            meetingEndTime = null;
+            isPaused = false;
+            pausedDuration = 0;
+            pauseStartedAt = null;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('meetingTimer').textContent = '00:00:00';
+            document.getElementById('meetingTimeRange').classList.add('hidden');
+            document.getElementById('meetingName').value = '';
+            document.getElementById('detectedSource').classList.add('hidden');
+            document.getElementById('transcriptArea').innerHTML = `<div id="emptyState" class="flex flex-col items-center justify-center h-full text-slate-500"><svg class="w-16 h-16 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg><p>Click "Start Recording" to begin transcription</p><p class="text-xs mt-1 opacity-60">Click any line to edit • Or enable Auto Mode</p></div>`;
+            document.getElementById('summaryArea').innerHTML = `<div class="flex flex-col items-center justify-center h-full text-slate-500"><svg class="w-16 h-16 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg><p>Click "Summarize" to generate meeting insights</p><p class="text-xs mt-1 opacity-60">TF-IDF TextRank algorithm • Runs locally in milliseconds</p></div>`;
+            document.getElementById('interimArea').textContent = '';
+            updateWordCount();
+            localStorage.removeItem('meetingTranscript');
+            localStorage.removeItem('meetingName');
+            localStorage.removeItem('meetingStartTime');
+            localStorage.removeItem('meetingEndTime');
+        }
+
+        // ==================== STORAGE ====================
+        function saveToStorage() {
+            localStorage.setItem('meetingTranscript', JSON.stringify(transcriptEntries));
+            localStorage.setItem('meetingName', document.getElementById('meetingName').value);
+            if (meetingStartTime) localStorage.setItem('meetingStartTime', meetingStartTime.toISOString());
+            if (meetingEndTime) localStorage.setItem('meetingEndTime', meetingEndTime.toISOString());
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('meetingTranscript');
+            if (saved) {
+                try {
+                    const entries = JSON.parse(saved);
+                    if (entries.length > 0) {
+                        document.getElementById('emptyState')?.remove();
+                        const area = document.getElementById('transcriptArea');
+                        entries.forEach(e => {
+                            transcriptEntries.push(e);
+                            area.appendChild(createTranscriptLineElement(e));
+                        });
+                        updateWordCount();
+                    }
+                } catch (e) { }
+            }
+
+            const savedName = localStorage.getItem('meetingName');
+            if (savedName) document.getElementById('meetingName').value = savedName;
+
+            const savedStart = localStorage.getItem('meetingStartTime');
+            const savedEnd = localStorage.getItem('meetingEndTime');
+            if (savedStart) {
+                meetingStartTime = new Date(savedStart);
+                document.getElementById('startTimeDisplay').textContent = formatTime(meetingStartTime);
+                document.getElementById('meetingTimeRange').classList.remove('hidden');
+            }
+            if (savedEnd) {
+                meetingEndTime = new Date(savedEnd);
+                document.getElementById('endTimeDisplay').textContent = formatTime(meetingEndTime);
+            }
+        }
+
+        // ==================== INIT ====================
+        document.getElementById('meetingName').addEventListener('input', saveToStorage);
+        // NOTE: We intentionally do NOT clear localStorage on beforeunload.
+        // Users should not lose their transcript if they accidentally close the tab.
+
+        // Load data
+        loadFromStorage();
+        loadPhrasesFromJSON();
+        showMicBannerIfNeeded();
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
