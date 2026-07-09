@@ -1,7 +1,7 @@
 {
-  "name": "Meeting Assistant",
-  "short_name": "MeetingAI",
-  "description": "Auto-transcribe and summarize meetings with greeting/farewell detection. Runs entirely in your browser — no data leaves your device.",
+  "name": "LocalScribe",
+  "short_name": "LocalScribe",
+  "description": "Auto-transcribe and summarize meetings with greeting/farewell detection. Runs entirely in your browser using browser's built-in speech recognition.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -21,6 +21,9 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "business"],
+  "categories": [
+    "productivity",
+    "business"
+  ],
   "screenshots": []
 }
