@@ -29,7 +29,7 @@ By editing the accompanying **auto_mode_phrases.json** configuration file, you c
 - **Start a Meeting:** Say your configured greeting to begin transcription.
 - **End a Meeting:** Say your configured farewell to stop transcription. The app will immediately separate the meeting notes and download a `.txt` file with a timestamp.
 
-## 🔒 Privacy First
+## Privacy First
 
 it's the perfect tool for environments with strict IT security policies for installing external third-party tools. Your meetings stay your meetings.
 
