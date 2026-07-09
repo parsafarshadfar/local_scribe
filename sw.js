@@ -1,4 +1,4 @@
-const CACHE_NAME = 'meeting-assistant-v4';
+const CACHE_NAME = 'local_scribe';
 
 self.addEventListener('install', () => self.skipWaiting());
 
