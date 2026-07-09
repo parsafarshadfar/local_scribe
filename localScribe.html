@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#3b82f6">
-    <title>Meeting Assistant</title>
+    <title>LocalScribe</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231e293b'/%3E%3Ccircle cx='50' cy='38' r='14' fill='%233b82f6'/%3E%3Crect x='35' y='55' width='30' height='4' rx='2' fill='%2360a5fa'/%3E%3Crect x='40' y='63' width='20' height='4' rx='2' fill='%2360a5fa'/%3E%3C/svg%3E">
@@ -437,18 +437,20 @@
                 <div>
                     <h1
                         class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent glow-text tracking-tight pb-1">
-                        Meeting Assistant
+                        LocalScribe
                     </h1>
                 </div>
                 <div class="flex items-center gap-3">
                     <!-- Theme Switcher -->
                     <div class="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full border border-white/10">
-                        <span class="theme-dot active" data-theme-val="dark" onclick="setTheme('dark')" title="Dark" aria-label="Dark theme"
+                        <span class="theme-dot active" data-theme-val="dark" onclick="setTheme('dark')" title="Dark"
+                            aria-label="Dark theme"
                             style="background: linear-gradient(135deg, #0f172a, #1e1b4b)"></span>
                         <span class="theme-dot" data-theme-val="midnight" onclick="setTheme('midnight')"
                             title="Midnight Purple" aria-label="Midnight Purple theme"
                             style="background: linear-gradient(135deg, #1a0a2e, #4c1d95)"></span>
-                        <span class="theme-dot" data-theme-val="light" onclick="setTheme('light')" title="Light" aria-label="Light theme"
+                        <span class="theme-dot" data-theme-val="light" onclick="setTheme('light')" title="Light"
+                            aria-label="Light theme"
                             style="background: linear-gradient(135deg, #f0f4ff, #e0e7ff)"></span>
                     </div>
                     <button id="installBtn" onclick="installPWA()"
@@ -718,8 +720,10 @@
 
         <!-- Footer -->
         <div class="mt-12 mb-4 flex flex-col items-center justify-center">
-            <h2 class="text-2xl md:text-3xl font-extrabold text-[#5c8aef] tracking-wide mb-3" style="text-shadow: 0 0 25px rgba(92, 138, 239, 0.7);">Developed by Parsa Farshadfar</h2>
-            <a href="https://parsafarshadfar.com" target="_blank" class="text-[#60a5fa] hover:text-blue-300 transition-colors text-base font-medium">parsafarshadfar.com</a>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-[#5c8aef] tracking-wide mb-3"
+                style="text-shadow: 0 0 25px rgba(92, 138, 239, 0.7);">Developed by Parsa Farshadfar</h2>
+            <a href="https://parsafarshadfar.com" target="_blank"
+                class="text-[#60a5fa] hover:text-blue-300 transition-colors text-base font-medium">parsafarshadfar.com</a>
         </div>
     </div>
 
@@ -811,7 +815,7 @@
             let detectedName = '';
             let source = '';
 
-            if (title && title !== 'Meeting Assistant' && title !== 'New Tab') {
+            if (title && title !== 'LocalScribe' && title !== 'New Tab') {
                 const teamsMatch = title.match(/(.+?)\s*\|\s*Microsoft Teams/i);
                 if (teamsMatch) { detectedName = teamsMatch[1].trim(); source = 'Microsoft Teams'; }
                 if (!detectedName) {
@@ -1517,7 +1521,7 @@
                 if (weakActionPatterns.some(p => p.test(s))) score += 1;
                 return { text: s, score };
             }).filter(item => item.score >= 2) // Only medium+ confidence
-              .sort((a, b) => b.score - a.score);
+                .sort((a, b) => b.score - a.score);
 
             // De-duplicate action items
             actionItems = removeDuplicateSentences(actionItems.map(i => i.text));
