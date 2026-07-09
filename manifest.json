@@ -2,7 +2,7 @@
   "name": "Meeting Assistant",
   "short_name": "MeetingAI",
   "description": "Auto-transcribe and summarize meetings with greeting/farewell detection. Runs entirely in your browser — no data leaves your device.",
-  "start_url": "./meeting_assistant.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#3b82f6",

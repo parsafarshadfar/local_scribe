@@ -13,14 +13,14 @@ Absolutely **no installation required**.
 ## Features
 
 - **100% Private & Corporate Safe:** All transcription happens locally in your browser.
-- **Zero Installation:** Works entirely within your web browser. Just open lunch_app.bat file and start transcribing.
+- **Zero Installation:** Works entirely within your web browser. Just open launch_app.bat file and start transcribing.
 - **Ultra-Lightweight (~100kb):** A minimalist and efficient codebase that doesn't hog system resources.
 - **Built-in Browser transcriber:** Leverages built-in Speech-to-text feature of browsers like Google Chrome and Microsoft Edge for accurate, seamless dictation.
 
 ## Getting Started
 
 1. Download or clone this repository.
-2. Double-click **`lunch_app.bat`** to launch the application.
+2. Double-click **`launch_app.bat`** to launch the application.
 3. Allow microphone access when prompted by the browser.
 4. Start speaking and watch your meeting get transcribed in real-time!
 
