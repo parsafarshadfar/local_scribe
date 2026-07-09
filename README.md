@@ -2,7 +2,7 @@
 
 **An ultra-lightweight (~100kb) local web app serving as a zero-installation meeting note-taker for corporate employees.**
 
-LocalScribe is a **local** web application that transcribes your meetings securely, right within your browser. By utilizing the browser's built-in speech recognition. it's the perfect tool for companies with strict IT security policies for installing external third-party tools. 
+LocalScribe is a **local** web application that transcribes your meetings securely, right within your browser. By utilizing the browser's built-in speech recognition. it's the perfect tool for **companies with strict IT security policies for installing external third-party tools**. 
 
 Absolutely **no installation required**.
 
